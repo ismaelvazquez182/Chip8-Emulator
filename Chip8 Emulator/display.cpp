@@ -8,11 +8,8 @@
 
 Display::Display(int width, int height): m_IsDone(false), m_Scale (10), m_Width(width), m_Height(height)
 {
-    m_Width *= m_Scale;
-    m_Height *= m_Scale;
-
     ::SDL_Init(SDL_INIT_VIDEO);
-    m_Window = SDL_CreateWindow("Chip 8 Emulator", m_Width, m_Height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    m_Window = SDL_CreateWindow("Chip 8 Emulator", m_Width * m_Scale, m_Height * m_Scale, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (m_Window == NULL) {
         ::SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not create window: %s\n", SDL_GetError());
         throw std::runtime_error("[-] Could not create window.");
@@ -24,9 +21,9 @@ Display::Display(int width, int height): m_IsDone(false), m_Scale (10), m_Width(
         throw std::runtime_error("[-] Could not create renderer.");
     }
 
-    m_Pixels = new bool*[height];
-    for (int i = 0; i < height; i++) {
-        m_Pixels[i] = new bool[width];
+    m_Pixels = new bool*[m_Height];
+    for (int i = 0; i < m_Height; i++) {
+        m_Pixels[i] = new bool[m_Width];
     }
 
     ClearScreen();
@@ -34,7 +31,7 @@ Display::Display(int width, int height): m_IsDone(false), m_Scale (10), m_Width(
 
 Display::~Display()
 {
-    for (int i = 0; i < m_Height / m_Scale; i++) {
+    for (int i = 0; i < m_Height; i++) {
         delete[] m_Pixels[i];
     }
     delete[] m_Pixels;
@@ -62,35 +59,29 @@ void Display::Render()
 
 void Display::drawScreen()
 {
-    for (int i = 0; i < m_Height / m_Scale; i++) {
-        for (int j = 0; j < m_Width / m_Scale; j++) {
+    for (int i = 0; i < m_Height; i++) {
+        for (int j = 0; j < m_Width; j++) {
             SDL_FRect rect{};
-            if (m_Pixels[i][j] == true) {
-                SDL_SetRenderDrawColor(m_Renderer, 255, 255, 255, 255);
-                rect.x = static_cast<float>(j * m_Width / (m_Width / m_Scale));
-                rect.y = static_cast<float>(i * m_Height / (m_Height / m_Scale));
-                rect.w = static_cast<float>(m_Height / (m_Height / m_Scale));
-                rect.h = static_cast<float>(m_Height / (m_Height / m_Scale));
+            rect.x = static_cast<float>(j * m_Scale);
+            rect.y = static_cast<float>(i * m_Scale);
+            rect.w = static_cast<float>(m_Scale);
+            rect.h = static_cast<float>(m_Scale);
 
-                SDL_RenderFillRect(m_Renderer, &rect);
-            }
-            else {
-                SDL_SetRenderDrawColor(m_Renderer, 0, 0, 0, 255);
-                rect.x = static_cast<float>(j * m_Width / (m_Width / m_Scale));
-                rect.y = static_cast<float>(i * m_Height / (m_Height / m_Scale));
-                rect.w = static_cast<float>(m_Height / (m_Height / m_Scale));
-                rect.h = static_cast<float>(m_Height / (m_Height / m_Scale));
+            SDL_SetRenderDrawColor(m_Renderer,
+                m_Pixels[i][j] ? 255 : 0,
+                m_Pixels[i][j] ? 255 : 0,
+                m_Pixels[i][j] ? 255 : 0,
+                255);
 
-                SDL_RenderFillRect(m_Renderer, &rect);
-            }
+            SDL_RenderFillRect(m_Renderer, &rect);
         }
     }
 }
 
 void Display::ClearScreen()
 {
-    for (int i = 0; i < m_Height / m_Scale; i++) {
-        for (int j = 0; j < m_Width / m_Scale; j++) {
+    for (int i = 0; i < m_Height; i++) {
+        for (int j = 0; j < m_Width; j++) {
             m_Pixels[i][j] = false;
         }
     }

@@ -109,11 +109,11 @@ void VirtualMachine::drawSprite()
 void VirtualMachine::setRegister()
 {
 	uint8_t secondByte = m_CurrentInstruction & 0xFF;
-	m_V[m_CurrentInstruction & 0xF00] = secondByte;
+	m_V[(m_CurrentInstruction & 0xF00) >> 8] = secondByte;
 }
 
 void VirtualMachine::addValue()
 {
 	uint8_t secondByte = m_CurrentInstruction & 0xFF;
-	m_V[m_CurrentInstruction & 0xF00] += secondByte;
+	m_V[(m_CurrentInstruction & 0xF00) >> 8] += secondByte;
 }
