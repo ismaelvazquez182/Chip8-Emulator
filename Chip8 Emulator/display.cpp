@@ -66,7 +66,7 @@ void Display::Render()
 
     drawPixels();
 
-    SDL_RenderPresent(m_Renderer);
+    ::SDL_RenderPresent(m_Renderer);
 }
 
 void Display::drawPixels()
@@ -79,13 +79,13 @@ void Display::drawPixels()
             rect.w = static_cast<float>(m_Scale);
             rect.h = static_cast<float>(m_Scale);
 
-            SDL_SetRenderDrawColor(m_Renderer,
+            ::SDL_SetRenderDrawColor(m_Renderer,
                 m_Pixels[i][j] ? 255 : 0,
                 m_Pixels[i][j] ? 255 : 0,
                 m_Pixels[i][j] ? 255 : 0,
                 255);
 
-            SDL_RenderFillRect(m_Renderer, &rect);
+            ::SDL_RenderFillRect(m_Renderer, &rect);
         }
     }
 }
