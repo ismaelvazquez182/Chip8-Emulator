@@ -21,7 +21,7 @@ void Memory::LoadProgram(const uint8_t* program, size_t programSize)
 	std::memcpy(m_Memory + 0x200, program, programSize);
 }
 
-void Memory::LoadFont(const uint8_t* fontData, size_t fontDataSize)
+void Memory::LoadFontIntoMemory(const uint8_t* fontData, size_t fontDataSize)
 {
 	std::memcpy(m_Memory, fontData, fontDataSize);
 }

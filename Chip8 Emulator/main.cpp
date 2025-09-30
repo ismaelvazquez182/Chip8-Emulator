@@ -8,7 +8,7 @@
 
 int __stdcall wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)
 {
-    std::ifstream pongFile("roms/splash.ch8", std::ios::binary | std::ios::ate);
+    std::ifstream pongFile("roms/ibm.ch8", std::ios::binary | std::ios::ate);
     if (!pongFile.is_open()) {
         return 1;
     }

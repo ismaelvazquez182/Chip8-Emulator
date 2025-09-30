@@ -12,14 +12,14 @@ public:
 	void ClearScreen();
 	void FlipPixel(uint8_t row, uint8_t col);
 	bool GetPixel(uint8_t row, uint8_t col);
-	bool IsDone() const;
+	bool ShouldClose() const;
 	void Render();
 
 private:
-	void allocateScreenMemory();
+	void allocatePixelMemory();
 	void createRenderer();
 	void createWindow();
-	void drawScreen();
+	void drawPixels();
 
 private:
 	int               m_Height;

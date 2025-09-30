@@ -11,7 +11,7 @@ Display::Display(int width, int height): m_IsDone(false), m_Scale (10), m_Width(
     ::SDL_Init(SDL_INIT_VIDEO);
     createWindow();
     createRenderer();
-    allocateScreenMemory();
+    allocatePixelMemory();
     ClearScreen();
 }
 
@@ -33,7 +33,7 @@ void Display::createRenderer()
     }
 }
 
-void Display::allocateScreenMemory()
+void Display::allocatePixelMemory()
 {
     m_Pixels = new bool* [m_Height];
     for (int i = 0; i < m_Height; i++) {
@@ -52,7 +52,7 @@ Display::~Display()
     ::SDL_Quit();
 }
 
-bool Display::IsDone() const { return m_IsDone; }
+bool Display::ShouldClose() const { return m_IsDone; }
 
 void Display::Render()
 {
@@ -64,12 +64,12 @@ void Display::Render()
         }
     }
 
-    drawScreen();
+    drawPixels();
 
     SDL_RenderPresent(m_Renderer);
 }
 
-void Display::drawScreen()
+void Display::drawPixels()
 {
     for (int i = 0; i < m_Height; i++) {
         for (int j = 0; j < m_Width; j++) {

@@ -8,7 +8,7 @@
 
 VirtualMachine::VirtualMachine()
 {
-	m_Monitor = new Display(64, 32);
+	m_Screen = new Display(64, 32);
 	m_Ram = new Memory();
 
 	uint8_t font[]{ 0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -27,13 +27,13 @@ VirtualMachine::VirtualMachine()
 					0xE0, 0x90, 0x90, 0x90, 0xE0, // D
 					0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
 					0xF0, 0x80, 0xF0, 0x80, 0x80 }; // F
-	m_Ram->LoadFont(font, sizeof(font));
+	m_Ram->LoadFontIntoMemory(font, sizeof(font));
 	m_ProgramCounterRegister = 0x200;
 }
 
 VirtualMachine::~VirtualMachine()
 {
-	delete m_Monitor;
+	delete m_Screen;
 	delete m_Ram;
 }
 
@@ -41,11 +41,11 @@ void VirtualMachine::Execute(const uint8_t* program, size_t programSize)
 {
 	m_Ram->LoadProgram(program, programSize);
 
-	while(!m_Monitor->IsDone()) {
+	while(!m_Screen->ShouldClose()) {
 		m_CurrentInstruction = m_Ram->FetchInstruction(m_ProgramCounterRegister);
 		incrementProgramCounter();
 		executeInstruction();
-		m_Monitor->Render();
+		m_Screen->Render();
 		Sleep(100);
 	}
 }
@@ -59,7 +59,7 @@ void VirtualMachine::executeInstruction()
 	switch (instructionFamily) {
 	case 0x0:
 		if (m_CurrentInstruction == 0x00E0)
-			m_Monitor->ClearScreen();
+			m_Screen->ClearScreen();
 		break;
 	case 0x1:
 		m_ProgramCounterRegister = m_CurrentInstruction & 0xFFF;
@@ -97,10 +97,10 @@ void VirtualMachine::drawSprite()
 				uint8_t pixelX = (xPos + col) % 64;
 				uint8_t pixelY = (yPos + row) % 32;
 
-				if (m_Monitor->GetPixel(pixelY, pixelX))
+				if (m_Screen->GetPixel(pixelY, pixelX))
 					m_V[0x0F] = 1;
 
-				m_Monitor->FlipPixel(pixelY, pixelX);
+				m_Screen->FlipPixel(pixelY, pixelX);
 			}
 		}
 	}
