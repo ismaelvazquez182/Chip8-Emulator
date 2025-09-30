@@ -24,7 +24,6 @@ private:
 	uint8_t               m_DelayTimer{ 0 };
 	uint16_t              m_IndexPointerRegister{ 0 };
 	uint16_t              m_ProgramCounterRegister{ 0 }; // instruction pointer
-	size_t                m_ProgramSize;
 	Display*              m_Monitor{ 0 };
 	Memory*               m_Ram{ 0 };
 	uint8_t               m_SoundTimer{ 0 };

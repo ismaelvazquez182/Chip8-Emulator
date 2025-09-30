@@ -14,6 +14,9 @@ public:
 	bool GetPixel(uint8_t row, uint8_t col);
 	bool IsDone() const;
 	void Render();
+
+private:
+	void drawScreen();
 private:
 	int               m_Height;
 	bool              m_IsDone;

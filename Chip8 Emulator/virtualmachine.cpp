@@ -39,7 +39,6 @@ VirtualMachine::~VirtualMachine()
 
 void VirtualMachine::Execute(const uint8_t* program, size_t programSize)
 {
-	m_ProgramSize = programSize;
 	m_Ram->LoadProgram(program, programSize);
 
 	while(!m_Monitor->IsDone()) {

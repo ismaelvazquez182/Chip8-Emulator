@@ -55,8 +55,13 @@ void Display::Render()
         }
     }
 
-    SDL_SetRenderDrawColor(m_Renderer, 255, 0, 0, 255);
+    drawScreen();
 
+    SDL_RenderPresent(m_Renderer);
+}
+
+void Display::drawScreen()
+{
     for (int i = 0; i < m_Height / m_Scale; i++) {
         for (int j = 0; j < m_Width / m_Scale; j++) {
             SDL_FRect rect{};
@@ -80,8 +85,6 @@ void Display::Render()
             }
         }
     }
-
-    SDL_RenderPresent(m_Renderer);
 }
 
 void Display::ClearScreen()
