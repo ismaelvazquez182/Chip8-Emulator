@@ -9,24 +9,36 @@
 Display::Display(int width, int height): m_IsDone(false), m_Scale (10), m_Width(width), m_Height(height)
 {
     ::SDL_Init(SDL_INIT_VIDEO);
+    createWindow();
+    createRenderer();
+    allocateScreenMemory();
+    ClearScreen();
+}
+
+void Display::createWindow()
+{
     m_Window = SDL_CreateWindow("Chip 8 Emulator", m_Width * m_Scale, m_Height * m_Scale, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (m_Window == NULL) {
         ::SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not create window: %s\n", SDL_GetError());
         throw std::runtime_error("[-] Could not create window.");
     }
+}
 
+void Display::createRenderer()
+{
     m_Renderer = SDL_CreateRenderer(m_Window, NULL);
     if (m_Renderer == NULL) {
         ::SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not create renderer: %s\n", SDL_GetError());
         throw std::runtime_error("[-] Could not create renderer.");
     }
+}
 
-    m_Pixels = new bool*[m_Height];
+void Display::allocateScreenMemory()
+{
+    m_Pixels = new bool* [m_Height];
     for (int i = 0; i < m_Height; i++) {
         m_Pixels[i] = new bool[m_Width];
     }
-
-    ClearScreen();
 }
 
 Display::~Display()

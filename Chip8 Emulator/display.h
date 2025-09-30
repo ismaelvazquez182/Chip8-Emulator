@@ -16,7 +16,11 @@ public:
 	void Render();
 
 private:
+	void allocateScreenMemory();
+	void createRenderer();
+	void createWindow();
 	void drawScreen();
+
 private:
 	int               m_Height;
 	bool              m_IsDone;
