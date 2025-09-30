@@ -4,26 +4,17 @@
 
 #include "memory.h"
 
-Memory::Memory() : m_AvailableMemory(4086) {
-	m_Memory = new uint8_t[m_AvailableMemory];
-}
-
-Memory::~Memory()
-{
-	delete[] m_Memory;
-}
-
 void Memory::LoadProgram(const uint8_t* program, size_t programSize)
 {
-	if (static_cast<uint16_t>(programSize) > (m_AvailableMemory - 0x200))
+	if (static_cast<uint16_t>(programSize) > (AVAILABLE_MEMORY - 0x200))
 		throw std::runtime_error("[-] Program exceeds available memory!");
 
-	std::memcpy(m_Memory + 0x200, program, programSize);
+	std::memcpy(m_Memory.data() + 0x200, program, programSize);
 }
 
 void Memory::LoadFontIntoMemory(const uint8_t* fontData, size_t fontDataSize)
 {
-	std::memcpy(m_Memory, fontData, fontDataSize);
+	std::memcpy(m_Memory.data(), fontData, fontDataSize);
 }
 
 uint16_t Memory::FetchInstruction(uint16_t offset) const

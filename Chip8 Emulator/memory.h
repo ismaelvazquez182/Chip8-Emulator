@@ -1,10 +1,11 @@
 #pragma once
+
+#include <array>
 #include <cstdint>
 
 class Memory {
 public:
-	Memory();
-	~Memory();
+	Memory() = default;
 
 	uint16_t FetchInstruction(uint16_t offset) const;
 	void     LoadFontIntoMemory(const uint8_t* fontData, size_t fontDataSize);
@@ -12,6 +13,6 @@ public:
 	uint8_t  Read(uint16_t offset) const;
 
 private:
-	uint16_t m_AvailableMemory;
-	uint8_t* m_Memory;
+	static constexpr uint16_t             AVAILABLE_MEMORY{ 4096 };
+	std::array<uint8_t, AVAILABLE_MEMORY> m_Memory{};
 };
