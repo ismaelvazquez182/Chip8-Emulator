@@ -6,8 +6,6 @@
 #include <memory>
 #include <vector>
 
-class Display;
-
 class VirtualMachine {
 public:
 	VirtualMachine();
@@ -15,12 +13,13 @@ public:
 	void Execute(const uint8_t* program, size_t programSize);
 
 private:
-	void addValue();
-	void drawSprite();
+	void addValue(uint8_t x, uint8_t secondByte);
+	void drawSprite(uint8_t x, uint8_t y, uint8_t n);
 	void executeInstruction();
+	void handle8xyOperations(uint8_t x, uint8_t y, uint8_t n);
 	void incrementProgramCounter();
-	void jumpToMemoryLocation();
-	void setRegister();
+	void setRegister(uint8_t secondByte);
+	void setRegisterToMemoryLocation(uint16_t &_register, uint8_t offset = 0);
 
 private:
 	uint16_t                 m_CurrentInstruction{ 0 };
