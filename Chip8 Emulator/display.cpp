@@ -13,6 +13,7 @@ Display::Display(int width, int height): m_IsDone(false), m_Scale (10), m_Width(
     createRenderer();
     allocatePixelMemory();
     ClearScreen();
+    bindKeys();
 }
 
 void Display::createWindow()
@@ -56,11 +57,18 @@ bool Display::ShouldClose() const { return m_IsDone; }
 
 void Display::Render()
 {
+
     SDL_Event event;
 
     while (::SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
             m_IsDone = true;
+        }
+        else if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) {
+            for (auto& k : m_Keys) {
+                if (event.key.scancode == k.scancode)
+                    k.isPressed = (event.type == SDL_EVENT_KEY_DOWN);
+            }
         }
     }
 
@@ -99,6 +107,27 @@ void Display::ClearScreen()
     }
 }
 
+void Display::bindKeys()
+{
+    m_Keys[0] =  { 0,  SDL_SCANCODE_X, false };
+    m_Keys[1] =  { 1,  SDL_SCANCODE_1, false };
+    m_Keys[2] =  { 2,  SDL_SCANCODE_2, false };
+    m_Keys[3] =  { 3,  SDL_SCANCODE_3, false };
+    m_Keys[4] =  { 4,  SDL_SCANCODE_Q, false };
+    m_Keys[5] =  { 5,  SDL_SCANCODE_W, false };
+    m_Keys[6] =  { 6,  SDL_SCANCODE_E, false };
+    m_Keys[7] =  { 7,  SDL_SCANCODE_A, false };
+    m_Keys[8] =  { 8,  SDL_SCANCODE_S, false };
+    m_Keys[9] =  { 9,  SDL_SCANCODE_D, false };
+    m_Keys[10] = { 10, SDL_SCANCODE_Z, false }; // A
+    m_Keys[11] = { 11, SDL_SCANCODE_C, false }; // B
+    m_Keys[12] = { 12, SDL_SCANCODE_4, false }; // C
+    m_Keys[13] = { 13, SDL_SCANCODE_R, false }; // D
+    m_Keys[14] = { 14, SDL_SCANCODE_F, false }; // E
+    m_Keys[15] = { 15, SDL_SCANCODE_V, false }; // F
+
+}
+
 bool Display::GetPixel(uint8_t row, uint8_t col)
 {
     return m_Pixels[row][col];
@@ -107,4 +136,9 @@ bool Display::GetPixel(uint8_t row, uint8_t col)
 void Display::FlipPixel(uint8_t row, uint8_t col)
 {
     m_Pixels[row][col] ^= true;
+}
+
+bool Display::IsKeyCurrentlyPressed(uint8_t key)
+{
+    return m_Keys[key].isPressed;
 }

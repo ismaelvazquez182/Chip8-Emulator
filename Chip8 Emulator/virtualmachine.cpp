@@ -1,5 +1,6 @@
 // virtualmachine.cpp
-
+#include <cstdlib>
+#include <ctime>
 #include <Windows.h>
 
 #include "virtualmachine.h"
@@ -51,6 +52,8 @@ VirtualMachine::VirtualMachine()
 					0xF0, 0x80, 0xF0, 0x80, 0x80 }; // F
 	m_Ram->LoadFontIntoMemory(font, sizeof(font));
 	m_ProgramCounterRegister = 0x200;
+
+	::srand(static_cast<unsigned int>(::time(0)));
 }
 
 void VirtualMachine::Execute(const uint8_t* program, size_t programSize)
@@ -58,11 +61,22 @@ void VirtualMachine::Execute(const uint8_t* program, size_t programSize)
 	m_Ram->LoadProgram(program, programSize);
 
 	while(!m_Screen->ShouldClose()) {
-		m_CurrentInstruction = m_Ram->FetchInstruction(m_ProgramCounterRegister);
-		incrementProgramCounter();
-		executeInstruction();
+		if (!m_IsBlock) {
+			m_CurrentInstruction = m_Ram->FetchInstruction(m_ProgramCounterRegister);
+			incrementProgramCounter();
+			executeInstruction();
+		}
+		else {
+			for (int i = 0; i < 16; i++)
+				if (m_Screen->IsKeyCurrentlyPressed(i)) {
+					uint8_t x = (m_CurrentInstruction & 0x0F00) >> 8;
+					m_V[x] = i;
+					m_IsBlock = false;
+				}
+		}
+		if (m_DelayTimer > 0) m_DelayTimer--;
+		if (m_SoundTimer > 0) m_SoundTimer--;
 		m_Screen->Render();
-		Sleep(100);
 	}
 }
 
@@ -125,13 +139,21 @@ void VirtualMachine::executeInstruction()
 		setRegisterToMemoryLocation(m_ProgramCounterRegister, m_V[0]);
 		break;
 	case InstructionFamily::RANDOM_C:
+		m_V[x] = secondByte & static_cast<uint8_t>(::rand() % 256);
 		break;
 	case InstructionFamily::DISPLAY_D:
 		drawSprite(x, y, n);
 		break;
 	case InstructionFamily::SKIP_IF_KEY_E:
+		if (secondByte == 0x9E)
+			if (m_Screen->IsKeyCurrentlyPressed(m_V[x]))
+				incrementProgramCounter();
+		if (secondByte == 0xA1)
+			if (!m_Screen->IsKeyCurrentlyPressed(m_V[x]))
+				incrementProgramCounter();
 		break;
 	case InstructionFamily::MISC_F:
+		handleFxyOperations(x, secondByte);
 		break;
 	}
 }
@@ -160,26 +182,30 @@ void VirtualMachine::handle8xyOperations(uint8_t x, uint8_t y, uint8_t n)
 	else if (n == 3) m_V[x] ^= m_V[y];
 	else if (n == 4) {
 		uint16_t sum = m_V[x] + m_V[y];
-		m_V[0xF] = sum > 0xFF ? 1 : 0;
 		m_V[x] = static_cast<uint8_t>(sum);
+		m_V[0xF] = sum > 0xFF ? 1 : 0;
 	}
 	else if (n == 5) {
-		m_V[0xF] = (m_V[x] > m_V[y]) ? 1 : 0;
+		uint8_t flag = (m_V[x] >= m_V[y]) ? 1 : 0;
 		m_V[x] -= m_V[y];
+		m_V[0xF] = flag;
 	}
 	else if (n == 6) {
 		// quirk
-		m_V[0xF] = m_V[x] & 1;
+		uint8_t flag = m_V[x] & 1;
 		m_V[x] >>= 1;
+		m_V[0xF] = flag;
 	}
 	else if (n == 7) {
-		m_V[0xF] = (m_V[x] > m_V[y]) ? 1 : 0;
+		uint8_t flag = (m_V[y] >= m_V[x]) ? 1 : 0;
 		m_V[x] = m_V[y] - m_V[x];
+		m_V[0xF] = flag;
 	}
 	else if (n == 0x0E) {
 		// quirk
-		m_V[0xF] = (m_V[x] & 0x80) >> 7;
+		uint8_t flag = (m_V[x] & 0x80) >> 7;
 		m_V[x] <<= 1;
+		m_V[0xF] = flag;
 	}
 }
 
@@ -204,4 +230,36 @@ void VirtualMachine::drawSprite(uint8_t x, uint8_t y, uint8_t n)
 			}
 		}
 	}
+}
+
+void VirtualMachine::handleFxyOperations(uint8_t x, uint8_t secondByte)
+{
+	if (secondByte == 0x07)
+		m_V[x] = m_DelayTimer;
+	else if (secondByte == 0x15)
+		m_DelayTimer = m_V[x];
+	else if (secondByte == 0x18)
+		m_SoundTimer = m_V[x];
+	else if (secondByte == 0x1E)
+		m_IndexPointerRegister += m_V[x];
+	else if (secondByte == 0x29)
+		m_IndexPointerRegister = m_Ram->Read(m_V[x] * 5);
+	else if (secondByte == 0x33) {
+		uint8_t b = m_V[x] / 100;
+		uint8_t c = (m_V[x] / 10) % 10;
+		uint8_t d = m_V[x] % 10;
+		m_Ram->Write(m_IndexPointerRegister, b);
+		m_Ram->Write(m_IndexPointerRegister + 1, c);
+		m_Ram->Write(m_IndexPointerRegister + 2, d);
+	}
+	else if (secondByte == 0x55) {
+		for (auto i = 0; i <= x; i++)
+			m_Ram->Write(m_IndexPointerRegister + i, m_V[i]);
+	}
+	else if (secondByte == 0x65) {
+		for (auto i = 0; i <= x; i++)
+			m_V[i] = m_Ram->Read(m_IndexPointerRegister + i);
+	}
+	else if (secondByte == 0x0A)
+		m_IsBlock = true;
 }

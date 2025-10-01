@@ -11,6 +11,7 @@ public:
 	void     LoadFontIntoMemory(const uint8_t* fontData, size_t fontDataSize);
 	void     LoadProgram(const uint8_t* program, size_t programSize);
 	uint8_t  Read(uint16_t offset) const;
+	void     Write(uint16_t address, uint8_t data);
 
 private:
 	static constexpr uint16_t             AVAILABLE_MEMORY{ 4096 };

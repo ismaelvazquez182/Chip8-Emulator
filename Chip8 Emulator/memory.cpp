@@ -26,3 +26,8 @@ uint8_t Memory::Read(uint16_t offset) const
 {
 	return m_Memory[offset];
 }
+
+void Memory::Write(uint16_t address, uint8_t data)
+{
+	m_Memory[address] = data;
+}

@@ -17,11 +17,13 @@ private:
 	void drawSprite(uint8_t x, uint8_t y, uint8_t n);
 	void executeInstruction();
 	void handle8xyOperations(uint8_t x, uint8_t y, uint8_t n);
+	void handleFxyOperations(uint8_t x, uint8_t secondByte);
 	void incrementProgramCounter();
 	void setRegister(uint8_t secondByte);
 	void setRegisterToMemoryLocation(uint16_t &_register, uint8_t offset = 0);
-
+	
 private:
+	bool                     m_IsBlock{ false };
 	uint16_t                 m_CurrentInstruction{ 0 };
 	uint8_t                  m_DelayTimer{ 0 };
 	uint16_t                 m_IndexPointerRegister{ 0 };
